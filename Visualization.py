@@ -7,7 +7,7 @@ import settings
 
 class Visualization:
     @staticmethod
-    def drawGraph(weights, edges, sectors, circular=False):
+    def drawGraph(weights, edges, sectors):
         vertices_colors = dict({
             "OTH" : "#FFFFFF",
             "ENG" : "#626567",
@@ -39,21 +39,22 @@ class Visualization:
         g.vs["name"] = settings.column_names
         g.es["weight"] = weight_index
 
-        fig, ax = plt.subplots(figsize=(10, 10))
+        _, ax = plt.subplots(figsize=(20, 20))
         layout = g.layout_auto()
-        if circular:
+        if settings.circular:
             layout = g.layout_reingold_tilford_circular()
         ig.plot(
             g,
             target=ax,
             layout=layout,
-            vertex_size=0.3,
+            vertex_size=0.325,
             vertex_frame_width=1.0,
             vertex_frame_color="black",
             vertex_label=g.vs["name"],
-            vertex_label_size=10.0,
+            vertex_label_size=6.0,
             vertex_color=[vertices_colors[sectors[name]] for name in g.vs["name"]],
-            edge_color = [edge_colors[index].hex for index in g.es["weight"]]
+            edge_color = [edge_colors[index].hex for index in g.es["weight"]],
+            edge_length = 2.0
         )
         plt.show()
 
@@ -64,7 +65,7 @@ class Visualization:
         for elem in centrals:
             labels.append(settings.column_names[elem])
 
-        fig, axs = plt.subplots(3, 3, figsize=(15, 12))
+        _, axs = plt.subplots(3, 3, figsize=(15, 12))
         axs[0, 0].plot(dates, lengths)
         axs[0, 0].set_title("Mean length")
         axs[0, 1].plot(dates, means)
@@ -101,4 +102,7 @@ class Visualization:
                 old_j = old_indices[j]
                 printed_matrix[i][j] = matrix[old_i][old_j]
 
+        sns.set(font_scale=0.75)
         plot = sns.heatmap(printed_matrix, xticklabels=names, yticklabels=names)
+        plt.show()
+        

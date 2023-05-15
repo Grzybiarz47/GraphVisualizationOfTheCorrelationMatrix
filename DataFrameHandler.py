@@ -11,6 +11,7 @@ class DataFrameHandler:
     def read(self, path, picked_column="Close"):
         all_files = glob.glob(path + "/*.csv")
         settings.n = len(all_files)
+        settings.column_names = []
         
         for filename in all_files:
             df = pd.read_csv(filename, index_col=None, header=0)
@@ -44,7 +45,6 @@ class DataFrameHandler:
 
         print(cdf.shape[0])
         print(settings.n)
-
         return cdf
     
     def getDates(self):

@@ -8,6 +8,8 @@ def init():
     global minimal_edges
     global window_start
     global window_end
+    global act_single_window
+    global circular
 
     n = 0
     column_names = []
@@ -17,3 +19,5 @@ def init():
     minimal_edges = 2
     window_start = 0
     window_end = 500
+    act_single_window = False
+    circular = False

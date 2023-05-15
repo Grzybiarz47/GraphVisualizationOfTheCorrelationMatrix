@@ -21,19 +21,18 @@ def draw(draw_type, graph_type, shrinkage_type, path):
     if draw_type == 0:
         draw_single_graph(g, s, path)
     elif draw_type == 1:
+        draw_matrix(g, s, path)
+    elif draw_type == 2:
         draw_all_stats(g, s, path)
 
 def draw_single_graph(graph_type, shrinkage_type, path):
     df, dates, sectors = read(path)
     analyzer = WindowAnalyzer(df)
-
-    corr_matrix, dist_matrix, _, edges, weights = analyzer.getSingleWindow(
+    _, _, _, edges, weights = analyzer.getSingleWindow(
         df[settings.window_start:settings.window_end], graph_type, shrinkage_type)
     print(str(dates[settings.window_start]) + " - " + str(dates[settings.window_end]))
 
-    Visualization.drawGraph(weights, edges, sectors, circular=False)
-    # Visualization.drawMatrix(corr_matrix, sectors)
-    # Visualization.drawMatrix(dist_matrix, sectors)
+    Visualization.drawGraph(weights, edges, sectors)
 
 def draw_all_stats(graph_type, shrinkage_type, path):
     df, dates, _ = read(path)
@@ -46,6 +45,15 @@ def draw_all_stats(graph_type, shrinkage_type, path):
     window_dates = dates.iloc[window_dates]
 
     Visualization.drawStats(window_dates, [lengths, means, centrals, occupation_layer, robust, variance, skewness, kurtosis, num_edges])
+
+def draw_matrix(graph_type, shrinkage_type, path):
+    df, dates, sectors = read(path)
+    analyzer = WindowAnalyzer(df)
+    corr_matrix, _, _, _, _ = analyzer.getSingleWindow(
+        df[settings.window_start:settings.window_end], graph_type, shrinkage_type)
+    print(str(dates[settings.window_start]) + " - " + str(dates[settings.window_end]))
+
+    Visualization.drawMatrix(corr_matrix, sectors)
 
 def read(path):
     df_handler = DataFrameHandler()

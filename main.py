@@ -12,7 +12,7 @@ customtkinter.set_default_color_theme("dark-blue")
 app_label_text = "Graph visualization of the correlation matrix"
 root = customtkinter.CTk()
 root.title(app_label_text)
-root.geometry("1400x1000")
+root.geometry("700x500")
 
 main_frame = customtkinter.CTkScrollableFrame(master=root)
 main_frame.pack(pady=20, padx=60, fill="both", expand=True)
@@ -40,12 +40,12 @@ directory_label.pack(pady=12, padx=10)
 radio_button_draw_type_var = customtkinter.IntVar(value=0)
 def read_radio_button_draw_type():
     print("toggled draw type, current value:", radio_button_draw_type_var.get())
-    if radio_button_draw_type_var.get() == 0:
+    if radio_button_draw_type_var.get() == 0 or radio_button_draw_type_var.get() == 1:
         entry_window_size.configure(state="disabled")
         entry_window_step_size.configure(state="disabled")
         entry_window_start.configure(state="normal")
         entry_window_end.configure(state="normal")
-    elif radio_button_draw_type_var.get() == 1:
+    elif radio_button_draw_type_var.get() == 2:
         entry_window_size.configure(state="normal")
         entry_window_step_size.configure(state="normal")
         entry_window_start.configure(state="disabled")
@@ -61,6 +61,13 @@ radio_button_draw_type_single_window = customtkinter.CTkRadioButton(master=radio
                                                                     value=0)
 radio_button_draw_type_single_window.pack(pady=12, padx=10)
 
+radio_button_draw_type_draw_matrix = customtkinter.CTkRadioButton(master=radio_button_draw_type_frame, 
+                                                                    text="Draw correlation matrix for single window",
+                                                                    command=read_radio_button_draw_type, 
+                                                                    variable=radio_button_draw_type_var, 
+                                                                    value=1)
+radio_button_draw_type_draw_matrix.pack(pady=12, padx=10)
+
 entry_window_start = customtkinter.CTkEntry(master=radio_button_draw_type_frame, 
                                             placeholder_text="Window start")
 entry_window_start.pack(pady=12, padx=10)
@@ -73,7 +80,7 @@ radio_button_draw_type_all_stats = customtkinter.CTkRadioButton(master=radio_but
                                                                 text="Draw stats",
                                                                 command=read_radio_button_draw_type, 
                                                                 variable=radio_button_draw_type_var, 
-                                                                value=1)
+                                                                value=2)
 radio_button_draw_type_all_stats.pack(pady=12, padx=10)
 
 entry_window_size = customtkinter.CTkEntry(master=radio_button_draw_type_frame, 
@@ -160,14 +167,41 @@ radio_button_shrinkage_type_threshold = customtkinter.CTkRadioButton(master=radi
                                                                  value=2)
 radio_button_shrinkage_type_threshold.pack(pady=12, padx=10)
 
+#GRAPH REPRESENTATION
+radio_button_draw_graph_circular_var = customtkinter.IntVar(value=0)
+def read_graph_representation():
+    if radio_button_draw_graph_circular_var.get() == 0:
+        settings.circular = False
+    elif radio_button_draw_graph_circular_var.get() == 1:
+        settings.circular = True
+
+radio_button_draw_graph_frame = customtkinter.CTkFrame(master=main_frame)
+radio_button_draw_graph_frame.pack(pady=20, padx=60, fill="both")
+
+radio_button_draw_graph_auto = customtkinter.CTkRadioButton(master=radio_button_draw_graph_frame, 
+                                                            text="Automatic graph representation",
+                                                            command=read_graph_representation, 
+                                                            variable=radio_button_draw_graph_circular_var, 
+                                                            value=0)
+radio_button_draw_graph_auto.pack(pady=12, padx=10)
+
+radio_button_draw_graph_circular = customtkinter.CTkRadioButton(master=radio_button_draw_graph_frame, 
+                                                                text="Circular graph representation",
+                                                                command=read_graph_representation, 
+                                                                variable=radio_button_draw_graph_circular_var, 
+                                                                value=1)
+radio_button_draw_graph_circular.pack(pady=12, padx=10)
+
 #CREATE DRAWING
 def create_plot():
-    if radio_button_draw_type_var.get() == 0:
+    if radio_button_draw_type_var.get() == 0 or radio_button_draw_type_var.get() == 1:
         settings.window_start = int(entry_window_start.get())
         settings.window_end = int(entry_window_end.get())
-    elif radio_button_draw_type_var.get() == 1:
+        settings.act_single_window = True
+    elif radio_button_draw_type_var.get() == 2:
         settings.window_size = int(entry_window_size.get())
         settings.step_size = int(entry_window_step_size.get())
+        settings.act_single_window = False
 
     if radio_button_graph_type_var.get() == 1:
         settings.minimal_edges = int(entry_n_edges.get())
@@ -176,7 +210,7 @@ def create_plot():
 
     commands.draw(draw_type=radio_button_draw_type_var.get(),
                   graph_type=radio_button_graph_type_var.get(),
-                  shrinkage_type=radio_button_shrinkage_type_var,
+                  shrinkage_type=radio_button_shrinkage_type_var.get(),
                   path=dir_path.get())
 
 create_button = customtkinter.CTkButton(master=main_frame, 

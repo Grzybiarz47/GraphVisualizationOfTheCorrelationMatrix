@@ -45,7 +45,7 @@ class WindowAnalyzer:
 
         LPS = LedoitPecheShrinkage(
             Y=real_data.Y,
-            T=settings.window_size
+            T=self.__calcWindowSize()
         )
 
         conv = LPS.rie(x=LPS.xi_LP)
@@ -60,7 +60,7 @@ class WindowAnalyzer:
 
         LPS = LedoitPecheShrinkage(
             Y=real_data.Y,
-            T=settings.window_size
+            T=self.__calcWindowSize()
         )
 
         conv = LPS.rie(x=self.windowed_xi_LP_iso)
@@ -182,7 +182,7 @@ class WindowAnalyzer:
             Centrals.append(central_node_index)
             
             #mean occupation layer
-            levels, mean_occupation_layer = LocalStats.findMeanOccupationLayer(edges.copy(), central_node_index)
+            _, mean_occupation_layer = LocalStats.findMeanOccupationLayer(edges.copy(), central_node_index)
             Occupation.append(mean_occupation_layer)
 
             #robustness
@@ -209,6 +209,12 @@ class WindowAnalyzer:
 
         Means, Variances, Skewness, Kurtosis = global_stats.getAllStats()
         return [Dates, Lengths, Means, Centrals, Occupation, Robustness, Variances, Skewness, Kurtosis, Num_edges]
+
+    def __calcWindowSize(self):
+        T = settings.window_size
+        if settings.act_single_window:
+            T = settings.window_end - settings.window_start
+        return T
             
     def __calcWindowedXiLpOracleIso(self):
         real_data = DataMatrix(
@@ -218,7 +224,7 @@ class WindowAnalyzer:
 
         LPS = LedoitPecheShrinkage(
             Y=real_data.Y,
-            T=settings.window_size,
+            T=self.__calcWindowSize(),
             T_out=settings.step_size
         )
 

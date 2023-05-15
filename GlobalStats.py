@@ -8,6 +8,10 @@ class GlobalStats:
 
     def __init__(self):
         self.n = settings.n
+        self.Means = []
+        self.Variances = []
+        self.Skewness = []
+        self.Kurtosis = []
 
     def makeNewStats(self, corr):
         m = self.findMeanCoef(corr)
