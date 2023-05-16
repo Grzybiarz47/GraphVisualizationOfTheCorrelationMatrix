@@ -126,9 +126,7 @@ class WindowAnalyzer:
                     distances[i][j] = 0
                 else:
                     p = corr[i][j]
-                    if p > 1:
-                        p = 1
-                    distances[i][j] = math.sqrt(2.0*(1 - p))
+                    distances[i][j] = math.sqrt(2.0*abs(1 - p))
 
         return distances
     
@@ -140,6 +138,8 @@ class WindowAnalyzer:
             corrMatrix = self.__createImprovedCoefMatrix(window)
         elif shrinkage_type == ShrinkageTypes.WINDOWED_SHRINKAGE_LP:
             corrMatrix = self.__createImprovedWindowedCoefMatrix(window)
+
+        corrMatrix = self.__normalizeCorrMatrix(corrMatrix)
 
         distMatrix = self.__createDistanceMatrix(corrMatrix)
         g = Graphs()
@@ -209,6 +209,18 @@ class WindowAnalyzer:
 
         Means, Variances, Skewness, Kurtosis = global_stats.getAllStats()
         return [Dates, Lengths, Means, Centrals, Occupation, Robustness, Variances, Skewness, Kurtosis, Num_edges]
+    
+    def __normalizeCorrMatrix(self, corr):
+        max_elem = 0
+        for i in range(settings.n):
+            for j in range(settings.n):
+                max_elem = max(max_elem, abs(corr[i][j]))
+        
+        for i in range(settings.n):
+            for j in range(settings.n):
+                corr[i][j] = corr[i][j] / max_elem
+        
+        return corr
 
     def __calcWindowSize(self):
         T = settings.window_size

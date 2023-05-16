@@ -47,11 +47,11 @@ class Visualization:
             g,
             target=ax,
             layout=layout,
-            vertex_size=0.325,
+            vertex_size=0.3,
             vertex_frame_width=1.0,
             vertex_frame_color="black",
             vertex_label=g.vs["name"],
-            vertex_label_size=6.0,
+            vertex_label_size=5.75,
             vertex_color=[vertices_colors[sectors[name]] for name in g.vs["name"]],
             edge_color = [edge_colors[index].hex for index in g.es["weight"]],
             edge_length = 2.0
@@ -102,7 +102,7 @@ class Visualization:
                 old_j = old_indices[j]
                 printed_matrix[i][j] = matrix[old_i][old_j]
 
-        sns.set(font_scale=0.75)
+        sns.set(font_scale=0.6)
         plot = sns.heatmap(printed_matrix, xticklabels=names, yticklabels=names)
         plt.show()
         
