@@ -28,9 +28,14 @@ def draw(draw_type, graph_type, shrinkage_type, path):
 def draw_single_graph(graph_type, shrinkage_type, path):
     df, dates, sectors = read(path)
     analyzer = WindowAnalyzer(df)
+    window_start = settings.window_start
+    window_end = settings.window_end
+    if shrinkage_type == ShrinkageTypes.WINDOWED_SHRINKAGE_LP:
+        window_end += 2*settings.year_span
+
     _, _, _, edges, weights = analyzer.getSingleWindow(
-        df[settings.window_start:settings.window_end], graph_type, shrinkage_type)
-    print(str(dates[settings.window_start]) + " - " + str(dates[settings.window_end]))
+        df[window_start:window_end], graph_type, shrinkage_type)
+    print(str(dates[window_start]) + " - " + str(dates[window_end]))
 
     Visualization.drawGraph(weights, edges, sectors)
 
@@ -49,9 +54,14 @@ def draw_all_stats(graph_type, shrinkage_type, path):
 def draw_matrix(graph_type, shrinkage_type, path):
     df, dates, sectors = read(path)
     analyzer = WindowAnalyzer(df)
+    window_start = settings.window_start
+    window_end = settings.window_end
+    if shrinkage_type == ShrinkageTypes.WINDOWED_SHRINKAGE_LP:
+        window_end += 2*settings.year_span
+
     corr_matrix, _, _, _, _ = analyzer.getSingleWindow(
-        df[settings.window_start:settings.window_end], graph_type, shrinkage_type)
-    print(str(dates[settings.window_start]) + " - " + str(dates[settings.window_end]))
+        df[window_start:window_end], graph_type, shrinkage_type)
+    print(str(dates[window_start]) + " - " + str(dates[window_end]))
 
     Visualization.drawMatrix(corr_matrix, sectors)
 

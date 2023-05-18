@@ -24,11 +24,9 @@ class ShrinkageTypes(Enum):
 
 class WindowAnalyzer:
     data = pd.DataFrame()
-    windowed_xi_LP_iso = []
 
     def __init__(self, df):
         self.data = df
-        self.__calcWindowedXiLpOracleIso()
         sys.path.insert(0,'./shrinkage')
     
     def getSingleWindow(self, window, graph_type=GraphTypes.MST, shrinkage_type=ShrinkageTypes.NO_SHRINKAGE):
@@ -51,7 +49,6 @@ class WindowAnalyzer:
         conv = LPS.rie(x=LPS.xi_LP)
         return conv
 
-
     def __shrinkWindowedConvMatrix(self, df):
         real_data = DataMatrix(
             method='load',
@@ -60,43 +57,49 @@ class WindowAnalyzer:
 
         LPS = LedoitPecheShrinkage(
             Y=real_data.Y,
-            T=self.__calcWindowSize()
+            T=self.__calcWindowSize(),
+            T_out=settings.year_span
         )
 
-        conv = LPS.rie(x=self.windowed_xi_LP_iso)
+        conv = LPS.rie(x=LPS.xi_oracle_mwcv_iso)
         return conv
     
-    def __calcCorrelationCoef(self, a, b):
-        a_avg = np.average(a)
-        b_avg = np.average(b)
+    def __calcCorrelationCoef(self, a, b, a_avg, b_avg, a_squered_avg, b_squered_avg):
         ab_product = a[:]*b[:]
         ab_product_avg = np.average(ab_product)
         numerator = ab_product_avg - a_avg*b_avg
-        a_squered = a[:]*a[:]
-        b_squered = b[:]*b[:]
-        a_squered_avg = np.average(a_squered)
-        b_squered_avg = np.average(b_squered)
         
         p = (numerator)/math.sqrt((a_squered_avg - a_avg*a_avg)*(b_squered_avg - b_avg*b_avg))
         return p
     
-    def __calcCorrelationCoefAfterShrinkage(self, a, b, conv_element):
-        a_avg = np.average(a)
-        b_avg = np.average(b)
-        numerator = conv_element - a_avg*b_avg
-        a_squered = a[:]*a[:]
-        b_squered = b[:]*b[:]
-        a_squered_avg = np.average(a_squered)
-        b_squered_avg = np.average(b_squered)
-        
-        p = (numerator)/math.sqrt((a_squered_avg - a_avg*a_avg)*(b_squered_avg - b_avg*b_avg))
+    def __calcCorrelationCoefAfterShrinkage(self, conv_i, conv_j, conv_ij):
+        p = (conv_ij)/math.sqrt((conv_i)*(conv_j))
         return p
 
     def __createCoefMatrix(self, df):
         corr = np.zeros(shape=(settings.n, settings.n))
+        avgs_a = np.zeros(settings.n)
+        avgs_b = np.zeros(settings.n)
+        avgs_aa = np.zeros(settings.n)
+        avgs_bb = np.zeros(settings.n)
+        for i in range(settings.n):
+            a = df[settings.column_names[i]][:] 
+            b = df[settings.column_names[i]][:]
+            a_squered = a[:]*a[:]
+            b_squered = b[:]*b[:]
+            avgs_a[i] = np.average(a)
+            avgs_b[i] = np.average(b)
+            avgs_aa[i] = np.average(a_squered)
+            avgs_bb[i] = np.average(b_squered)
+
         for i in range(settings.n):
             for j in range(settings.n):
-                corr[i][j] = self.__calcCorrelationCoef(df[settings.column_names[i]][:], df[settings.column_names[j]][:])
+                corr[i][j] = self.__calcCorrelationCoef(df[settings.column_names[i]][:], 
+                                                        df[settings.column_names[j]][:],
+                                                        avgs_a[i],
+                                                        avgs_b[j],
+                                                        avgs_aa[i],
+                                                        avgs_bb[j])
 
         return corr
     
@@ -105,7 +108,7 @@ class WindowAnalyzer:
         conv = self.__shrinkConvMatrix(df)
         for i in range(settings.n):
             for j in range(settings.n):
-                corr[i][j] = self.__calcCorrelationCoefAfterShrinkage(df[settings.column_names[i]][:], df[settings.column_names[j]][:], conv[i][j])
+                corr[i][j] = self.__calcCorrelationCoefAfterShrinkage(conv[i][i], conv[j][j], conv[i][j])
 
         return corr
     
@@ -114,7 +117,7 @@ class WindowAnalyzer:
         conv = self.__shrinkWindowedConvMatrix(df)
         for i in range(settings.n):
             for j in range(settings.n):
-                corr[i][j] = self.__calcCorrelationCoefAfterShrinkage(df[settings.column_names[i]][:], df[settings.column_names[j]][:], conv[i][j])
+                corr[i][j] = self.__calcCorrelationCoefAfterShrinkage(conv[i][i], conv[j][j], conv[i][j])
 
         return corr
     
@@ -139,8 +142,6 @@ class WindowAnalyzer:
         elif shrinkage_type == ShrinkageTypes.WINDOWED_SHRINKAGE_LP:
             corrMatrix = self.__createImprovedWindowedCoefMatrix(window)
 
-        corrMatrix = self.__normalizeCorrMatrix(corrMatrix)
-
         distMatrix = self.__createDistanceMatrix(corrMatrix)
         g = Graphs()
 
@@ -158,6 +159,9 @@ class WindowAnalyzer:
         start_time = 0
         global_stats = GlobalStats()
 
+        if shrinkage_type == ShrinkageTypes.WINDOWED_SHRINKAGE_LP:
+            period -= 2*settings.year_span
+
         prev_edges = []
         Lengths = []
         Centrals = []
@@ -165,10 +169,15 @@ class WindowAnalyzer:
         Occupation = []
         Robustness = []
         Num_edges = []
-        while start_time + settings.window_size < period:
-            end_time = start_time + settings.window_size
-            window = df[start_time:end_time]
+
+        window_size = self.__calcWindowSize()
+        while start_time + window_size < period:
+            end_time = start_time + window_size
             Dates.append(end_time)
+            if shrinkage_type == ShrinkageTypes.WINDOWED_SHRINKAGE_LP:
+                end_time += 2*settings.year_span
+            window = df[start_time:end_time]
+
             start_time += settings.step_size
             corrMatrix, _, _, edges, weights = self.__pickWindowResults(window, graph_type, shrinkage_type)
             mean_coef, variance, skewness, kurtosis = global_stats.makeNewStats(corrMatrix)
@@ -210,34 +219,8 @@ class WindowAnalyzer:
         Means, Variances, Skewness, Kurtosis = global_stats.getAllStats()
         return [Dates, Lengths, Means, Centrals, Occupation, Robustness, Variances, Skewness, Kurtosis, Num_edges]
     
-    def __normalizeCorrMatrix(self, corr):
-        max_elem = 0
-        for i in range(settings.n):
-            for j in range(settings.n):
-                max_elem = max(max_elem, abs(corr[i][j]))
-        
-        for i in range(settings.n):
-            for j in range(settings.n):
-                corr[i][j] = corr[i][j] / max_elem
-        
-        return corr
-
     def __calcWindowSize(self):
         T = settings.window_size
         if settings.act_single_window:
             T = settings.window_end - settings.window_start
         return T
-            
-    def __calcWindowedXiLpOracleIso(self):
-        real_data = DataMatrix(
-            method='load',
-            Y=self.data.to_numpy().T
-        )
-
-        LPS = LedoitPecheShrinkage(
-            Y=real_data.Y,
-            T=self.__calcWindowSize(),
-            T_out=settings.step_size
-        )
-
-        self.windowed_xi_LP_iso = LPS.xi_oracle_mwcv_iso
