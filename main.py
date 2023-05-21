@@ -170,6 +170,7 @@ radio_button_shrinkage_type_threshold.pack(pady=12, padx=10)
 #GRAPH REPRESENTATION
 radio_button_draw_graph_circular_var = customtkinter.IntVar(value=0)
 def read_graph_representation():
+    print("toggled graph representation type, current value:", radio_button_draw_graph_circular_var.get())
     if radio_button_draw_graph_circular_var.get() == 0:
         settings.circular = False
     elif radio_button_draw_graph_circular_var.get() == 1:
@@ -192,6 +193,18 @@ radio_button_draw_graph_circular = customtkinter.CTkRadioButton(master=radio_but
                                                                 value=1)
 radio_button_draw_graph_circular.pack(pady=12, padx=10)
 
+#PICK COLUMN
+option_type_var = customtkinter.StringVar(value="Close")
+def read_option_menu(choice):
+    print("option menu dropdown clicked:", choice)
+
+option_menu = customtkinter.CTkOptionMenu(master=radio_button_draw_graph_frame,
+                                          values=["Close", "Open", "High", "Low"],
+                                          command=read_option_menu,
+                                          variable=option_type_var)
+option_menu.pack(pady=12, padx=10)
+option_menu.set("Close")
+
 #CREATE DRAWING
 def create_plot():
     if radio_button_draw_type_var.get() == 0 or radio_button_draw_type_var.get() == 1:
@@ -211,6 +224,7 @@ def create_plot():
     commands.draw(draw_type=radio_button_draw_type_var.get(),
                   graph_type=radio_button_graph_type_var.get(),
                   shrinkage_type=radio_button_shrinkage_type_var.get(),
+                  colummn_picked=option_type_var.get(),
                   path=dir_path.get())
 
 create_button = customtkinter.CTkButton(master=main_frame, 

@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import settings
 
-def draw(draw_type, graph_type, shrinkage_type, path):
+def draw(draw_type, graph_type, shrinkage_type, colummn_picked, path):
     g = GraphTypes.MST
     if graph_type == 1:
         g = GraphTypes.MINIMAL_N_EDGES
@@ -19,14 +19,14 @@ def draw(draw_type, graph_type, shrinkage_type, path):
         s = ShrinkageTypes.WINDOWED_SHRINKAGE_LP
     
     if draw_type == 0:
-        draw_single_graph(g, s, path)
+        draw_single_graph(g, s, colummn_picked, path)
     elif draw_type == 1:
-        draw_matrix(g, s, path)
+        draw_matrix(g, s, colummn_picked, path)
     elif draw_type == 2:
-        draw_all_stats(g, s, path)
+        draw_all_stats(g, s, colummn_picked, path)
 
-def draw_single_graph(graph_type, shrinkage_type, path):
-    df, dates, sectors = read(path)
+def draw_single_graph(graph_type, shrinkage_type, colummn_picked, path):
+    df, dates, sectors = read(path, colummn_picked)
     analyzer = WindowAnalyzer(df)
     window_start = settings.window_start
     window_end = settings.window_end
@@ -39,8 +39,8 @@ def draw_single_graph(graph_type, shrinkage_type, path):
 
     Visualization.drawGraph(weights, edges, sectors)
 
-def draw_all_stats(graph_type, shrinkage_type, path):
-    df, dates, _ = read(path)
+def draw_all_stats(graph_type, shrinkage_type, colummn_picked, path):
+    df, dates, _ = read(path, colummn_picked)
     analyzer = WindowAnalyzer(df)
 
     window_dates, lengths, means, centrals, occupation_layer, robust, variance, skewness, kurtosis, num_edges = analyzer.getAllWindows(df, 
@@ -51,8 +51,8 @@ def draw_all_stats(graph_type, shrinkage_type, path):
 
     Visualization.drawStats(window_dates, [lengths, means, centrals, occupation_layer, robust, variance, skewness, kurtosis, num_edges])
 
-def draw_matrix(graph_type, shrinkage_type, path):
-    df, dates, sectors = read(path)
+def draw_matrix(graph_type, shrinkage_type, colummn_picked, path):
+    df, dates, sectors = read(path, colummn_picked)
     analyzer = WindowAnalyzer(df)
     window_start = settings.window_start
     window_end = settings.window_end
@@ -65,9 +65,9 @@ def draw_matrix(graph_type, shrinkage_type, path):
 
     Visualization.drawMatrix(corr_matrix, sectors)
 
-def read(path):
+def read(path, colummn_picked):
     df_handler = DataFrameHandler()
-    df = df_handler.read(path)
+    df = df_handler.read(path, colummn_picked)
     dates = df_handler.getDates()
     sectors = df_handler.getSectors()
     return [df, dates, sectors]
