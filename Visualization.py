@@ -6,22 +6,23 @@ import seaborn as sns
 import settings
 
 class Visualization:
+    vertices_colors = dict({
+        "ENG" : "#626567",
+        "MAT" : "#3498DB",
+        "IND" : "#9B59B6",
+        "CONSD" : "#F9E79F",
+        "CONSS" : "#CA6F1E",
+        "HC" : "#E74C3C",
+        "FIN" : "#48C9B0",
+        "IT" : "#25F62B",
+        "COMMS" : "#25EDF6",
+        "UTIL" : "#F28F1C",
+        "RE" : "#C5B4E3",
+        "OTH" : "#FFFFFF"
+    })
+
     @staticmethod
     def drawGraph(weights, edges, sectors):
-        vertices_colors = dict({
-            "OTH" : "#FFFFFF",
-            "ENG" : "#626567",
-            "MAT" : "#3498DB",
-            "IND" : "#9B59B6",
-            "CONSD" : "#F9E79F",
-            "CONSS" : "#CA6F1E",
-            "HC" : "#E74C3C",
-            "FIN" : "#48C9B0",
-            "IT" : "#25F62B",
-            "COMMS" : "#25EDF6",
-            "UTIL" : "#F28F1C",
-            "RE" : "#C5B4E3"
-        })
         edge_colors = list(Color("red").range_to(Color("cornsilk"), 10))
         min_weight = 0
         max_weight = 0
@@ -52,10 +53,19 @@ class Visualization:
             vertex_frame_color="black",
             vertex_label=g.vs["name"],
             vertex_label_size=5.75,
-            vertex_color=[vertices_colors[sectors[name]] for name in g.vs["name"]],
+            vertex_color=[Visualization.vertices_colors[sectors[name]] for name in g.vs["name"]],
             edge_color = [edge_colors[index].hex for index in g.es["weight"]],
-            edge_length = 2.0
+            edge_length = 5.0
         )
+        keys = list(Visualization.vertices_colors.keys())
+        keys.sort()
+        vals = []
+        for key in keys:
+            vals.append(Visualization.vertices_colors[key])
+        leg = plt.legend(keys, fontsize=10)
+        for i, j in enumerate(leg.legendHandles):
+            j.set_color(vals[i])
+        plt.get_current_fig_manager().window.state('zoomed')
         plt.show()
 
     @staticmethod
@@ -87,11 +97,12 @@ class Visualization:
         plt.show()
 
     @staticmethod
-    def drawMatrix(matrix, sectors):
+    def drawMatrix(matrix, raw_sectors):
         plt.figure(figsize=(15, 12))
         printed_matrix = np.zeros(shape=(settings.n, settings.n))
-        names = sorted(sectors.items(), key=lambda x:(x[1], x[0]))
-        names = [val[0] for val in names]
+        names_and_sectors = sorted(raw_sectors.items(), key=lambda x:(x[1], x[0]))
+        names = [val[0] for val in names_and_sectors]
+        sectors = [val[1] for val in names_and_sectors]
         old_indices = []
         for i in range(settings.n):
             old_indices.append(settings.column_names.index(names[i]))
@@ -103,6 +114,11 @@ class Visualization:
                 printed_matrix[i][j] = matrix[old_i][old_j]
 
         sns.set(font_scale=0.6)
-        plot = sns.heatmap(printed_matrix, xticklabels=names, yticklabels=names)
+        ax = sns.heatmap(printed_matrix, xticklabels=names, yticklabels=names)
+        for i, tick_label in enumerate(ax.axes.get_xticklabels()):
+            if sectors[i] != 'OTH':
+                tick_label.set_color(Visualization.vertices_colors[sectors[i]])
+        for i, tick_label in enumerate(ax.axes.get_yticklabels()):
+            if sectors[i] != 'OTH':
+                tick_label.set_color(Visualization.vertices_colors[sectors[i]])
         plt.show()
-        

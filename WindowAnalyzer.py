@@ -34,6 +34,20 @@ class WindowAnalyzer:
     
     def getAllWindows(self, df, graph_type=GraphTypes.MST, shrinkage_type=ShrinkageTypes.NO_SHRINKAGE, print_stats=False):
         return self.__createWindows(df, graph_type, shrinkage_type, print_stats)
+    
+    def __createConvMatrix(self, df):
+        real_data = DataMatrix(
+            method='load',
+            Y=df.to_numpy().T
+        )
+
+        LPS = LedoitPecheShrinkage(
+            Y=real_data.Y,
+            T=self.__calcWindowSize()
+        )
+
+        conv = LPS.rie(x=LPS.E_eigval)
+        return conv
 
     def __shrinkConvMatrix(self, df):
         real_data = DataMatrix(
@@ -64,42 +78,16 @@ class WindowAnalyzer:
         conv = LPS.rie(x=LPS.xi_oracle_mwcv_iso)
         return conv
     
-    def __calcCorrelationCoef(self, a, b, a_avg, b_avg, a_squered_avg, b_squered_avg):
-        ab_product = a[:]*b[:]
-        ab_product_avg = np.average(ab_product)
-        numerator = ab_product_avg - a_avg*b_avg
-        
-        p = (numerator)/math.sqrt((a_squered_avg - a_avg*a_avg)*(b_squered_avg - b_avg*b_avg))
-        return p
-    
-    def __calcCorrelationCoefAfterShrinkage(self, conv_i, conv_j, conv_ij):
+    def __calcCorrelationCoef(self, conv_i, conv_j, conv_ij):
         p = (conv_ij)/math.sqrt((conv_i)*(conv_j))
         return p
 
     def __createCoefMatrix(self, df):
         corr = np.zeros(shape=(settings.n, settings.n))
-        avgs_a = np.zeros(settings.n)
-        avgs_b = np.zeros(settings.n)
-        avgs_aa = np.zeros(settings.n)
-        avgs_bb = np.zeros(settings.n)
-        for i in range(settings.n):
-            a = df[settings.column_names[i]][:] 
-            b = df[settings.column_names[i]][:]
-            a_squered = a[:]*a[:]
-            b_squered = b[:]*b[:]
-            avgs_a[i] = np.average(a)
-            avgs_b[i] = np.average(b)
-            avgs_aa[i] = np.average(a_squered)
-            avgs_bb[i] = np.average(b_squered)
-
+        conv = self.__createConvMatrix(df)
         for i in range(settings.n):
             for j in range(settings.n):
-                corr[i][j] = self.__calcCorrelationCoef(df[settings.column_names[i]][:], 
-                                                        df[settings.column_names[j]][:],
-                                                        avgs_a[i],
-                                                        avgs_b[j],
-                                                        avgs_aa[i],
-                                                        avgs_bb[j])
+                corr[i][j] = self.__calcCorrelationCoef(conv[i][i], conv[j][j], conv[i][j])
 
         return corr
     
@@ -108,7 +96,7 @@ class WindowAnalyzer:
         conv = self.__shrinkConvMatrix(df)
         for i in range(settings.n):
             for j in range(settings.n):
-                corr[i][j] = self.__calcCorrelationCoefAfterShrinkage(conv[i][i], conv[j][j], conv[i][j])
+                corr[i][j] = self.__calcCorrelationCoef(conv[i][i], conv[j][j], conv[i][j])
 
         return corr
     
@@ -117,7 +105,7 @@ class WindowAnalyzer:
         conv = self.__shrinkWindowedConvMatrix(df)
         for i in range(settings.n):
             for j in range(settings.n):
-                corr[i][j] = self.__calcCorrelationCoefAfterShrinkage(conv[i][i], conv[j][j], conv[i][j])
+                corr[i][j] = self.__calcCorrelationCoef(conv[i][i], conv[j][j], conv[i][j])
 
         return corr
     

@@ -12,6 +12,9 @@ class DataFrameHandler:
         all_files = glob.glob(path + "/*.csv")
         settings.n = len(all_files)
         settings.column_names = []
+        self.sector = dict()
+        self.picked = dict()
+        self.di = dict()
         
         for filename in all_files:
             df = pd.read_csv(filename, index_col=None, header=0)
