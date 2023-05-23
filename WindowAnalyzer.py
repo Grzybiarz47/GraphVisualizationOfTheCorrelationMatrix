@@ -72,7 +72,7 @@ class WindowAnalyzer:
         LPS = LedoitPecheShrinkage(
             Y=real_data.Y,
             T=self.__calcWindowSize(),
-            T_out=settings.year_span
+            T_out=settings.t_out
         )
 
         conv = LPS.rie(x=LPS.xi_oracle_mwcv_iso)
@@ -148,7 +148,7 @@ class WindowAnalyzer:
         global_stats = GlobalStats()
 
         if shrinkage_type == ShrinkageTypes.WINDOWED_SHRINKAGE_LP:
-            period -= 2*settings.year_span
+            period -= 2*settings.t_out
 
         prev_edges = []
         Lengths = []
@@ -163,7 +163,7 @@ class WindowAnalyzer:
             end_time = start_time + window_size
             Dates.append(end_time)
             if shrinkage_type == ShrinkageTypes.WINDOWED_SHRINKAGE_LP:
-                end_time += 2*settings.year_span
+                end_time += 2*settings.t_out
             window = df[start_time:end_time]
 
             start_time += settings.step_size

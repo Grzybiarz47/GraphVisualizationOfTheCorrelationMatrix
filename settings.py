@@ -10,7 +10,8 @@ def init():
     global window_end
     global act_single_window
     global circular
-    global year_span
+    global t_out
+    global all_stats_together
 
     n = 0
     column_names = []
@@ -22,4 +23,5 @@ def init():
     window_end = 500
     act_single_window = False
     circular = False
-    year_span = 250
+    t_out = 200
+    all_stats_together = False

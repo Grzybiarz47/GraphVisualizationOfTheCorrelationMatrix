@@ -23,7 +23,10 @@ def draw(draw_type, graph_type, shrinkage_type, colummn_picked, path):
     elif draw_type == 1:
         draw_matrix(g, s, colummn_picked, path)
     elif draw_type == 2:
-        draw_all_stats(g, s, colummn_picked, path)
+        if settings.all_stats_together == True:
+            draw_all_stats_together(g, colummn_picked, path)
+        else:
+            draw_all_stats(g, s, colummn_picked, path)
 
 def draw_single_graph(graph_type, shrinkage_type, colummn_picked, path):
     df, dates, sectors = read(path, colummn_picked)
@@ -50,6 +53,31 @@ def draw_all_stats(graph_type, shrinkage_type, colummn_picked, path):
     window_dates = dates.iloc[window_dates]
 
     Visualization.drawStats(window_dates, [lengths, means, centrals, occupation_layer, robust, variance, skewness, kurtosis, num_edges])
+
+def draw_all_stats_together(graph_type, colummn_picked, path):
+    df, dates, _ = read(path, colummn_picked)
+    analyzer = WindowAnalyzer(df)
+
+    window_dates, lengths, means, centrals, occupation_layer, robust, variance, skewness, kurtosis, num_edges = analyzer.getAllWindows(df, 
+                                                                                                                                       graph_type, 
+                                                                                                                                       ShrinkageTypes.NO_SHRINKAGE, 
+                                                                                                                                       print_stats=False)
+    window_dates = dates.iloc[window_dates]
+    no_shrinkage_stats = [lengths, means, centrals, occupation_layer, robust, variance, skewness, kurtosis, num_edges]
+
+    _, lengths, means, centrals, occupation_layer, robust, variance, skewness, kurtosis, num_edges = analyzer.getAllWindows(df, 
+                                                                                                                            graph_type, 
+                                                                                                                            ShrinkageTypes.SIMPLE_SHRINKAGE_LP, 
+                                                                                                                            print_stats=False)
+    simple_lp_shrinkage = [lengths, means, centrals, occupation_layer, robust, variance, skewness, kurtosis, num_edges]
+
+    _, lengths, means, centrals, occupation_layer, robust, variance, skewness, kurtosis, num_edges = analyzer.getAllWindows(df, 
+                                                                                                                            graph_type, 
+                                                                                                                            ShrinkageTypes.WINDOWED_SHRINKAGE_LP, 
+                                                                                                                            print_stats=False)
+    windowed_lp_shrinkage = [lengths, means, centrals, occupation_layer, robust, variance, skewness, kurtosis, num_edges]
+
+    Visualization.drawAllStatsTogether(window_dates, no_shrinkage_stats, simple_lp_shrinkage, windowed_lp_shrinkage)
 
 def draw_matrix(graph_type, shrinkage_type, colummn_picked, path):
     df, dates, sectors = read(path, colummn_picked)

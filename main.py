@@ -45,11 +45,13 @@ def read_radio_button_draw_type():
         entry_window_step_size.configure(state="disabled")
         entry_window_start.configure(state="normal")
         entry_window_end.configure(state="normal")
+        checkbox.configure(state="disabled")
     elif radio_button_draw_type_var.get() == 2:
         entry_window_size.configure(state="normal")
         entry_window_step_size.configure(state="normal")
         entry_window_start.configure(state="disabled")
         entry_window_end.configure(state="disabled")
+        checkbox.configure(state="normal")
 
 radio_button_draw_type_frame = customtkinter.CTkFrame(master=main_frame)
 radio_button_draw_type_frame.pack(pady=20, padx=60, fill="both")
@@ -92,6 +94,47 @@ entry_window_step_size = customtkinter.CTkEntry(master=radio_button_draw_type_fr
                                                 placeholder_text="Window step size")
 entry_window_step_size.configure(state="disabled")
 entry_window_step_size.pack(pady=12, padx=10)
+
+#DRAW ALL STATS
+check_box_draw_all_stats_var = customtkinter.StringVar(value="off")
+def read_checkbox_all_stats():
+    print("checkbox toggled, current value:", check_box_draw_all_stats_var.get())
+
+checkbox = customtkinter.CTkCheckBox(master=radio_button_draw_type_frame,
+                                     text="Draw all stats together",
+                                     command=read_checkbox_all_stats,
+                                     variable=check_box_draw_all_stats_var,
+                                     onvalue="on",
+                                     offvalue="off")
+checkbox.configure(state="disabled")
+checkbox.pack(padx=12, pady=10)
+
+#SHRINKAGE TYPES
+radio_button_shrinkage_type_var = customtkinter.IntVar(value=0)
+def read_radio_button_shrinkage_type():
+    print("toggled shrink type, current value:", radio_button_shrinkage_type_var.get())
+
+radio_button_shrinkage_type_frame = customtkinter.CTkFrame(master=main_frame)
+radio_button_shrinkage_type_frame.pack(pady=20, padx=60, fill="both")
+
+radio_button_shrinkage_type_mst = customtkinter.CTkRadioButton(master=radio_button_shrinkage_type_frame, 
+                                                           text="No shrinkage",
+                                                           command=read_radio_button_shrinkage_type, 
+                                                           variable=radio_button_shrinkage_type_var, 
+                                                           value=0)
+radio_button_shrinkage_type_mst.pack(pady=12, padx=10)
+radio_button_shrinkage_type_minnedges = customtkinter.CTkRadioButton(master=radio_button_shrinkage_type_frame, 
+                                                                 text="LP shrinkage on static window", 
+                                                                 command=read_radio_button_shrinkage_type, 
+                                                                 variable=radio_button_shrinkage_type_var, 
+                                                                 value=1)
+radio_button_shrinkage_type_minnedges.pack(pady=12, padx=10)
+radio_button_shrinkage_type_threshold = customtkinter.CTkRadioButton(master=radio_button_shrinkage_type_frame, 
+                                                                 text="Bartz shrinkage on moving window",
+                                                                 command=read_radio_button_shrinkage_type,
+                                                                 variable=radio_button_shrinkage_type_var, 
+                                                                 value=2)
+radio_button_shrinkage_type_threshold.pack(pady=12, padx=10)
 
 #GRAPH TYPES
 radio_button_graph_type_var = customtkinter.IntVar(value=0)
@@ -136,36 +179,9 @@ radio_button_graph_type_threshold = customtkinter.CTkRadioButton(master=radio_bu
 radio_button_graph_type_threshold.pack(pady=12, padx=10)
 
 entry_threshold = customtkinter.CTkEntry(master=radio_button_graph_type_frame,
-                                                placeholder_text="Threshold value")
+                                         placeholder_text="Threshold value")
 entry_threshold.configure(state="disabled")
 entry_threshold.pack(pady=12, padx=10)
-
-#SHRINKAGE TYPES
-radio_button_shrinkage_type_var = customtkinter.IntVar(value=0)
-def read_radio_button_shrinkage_type():
-    print("toggled shrink type, current value:", radio_button_shrinkage_type_var.get())
-
-radio_button_shrinkage_type_frame = customtkinter.CTkFrame(master=main_frame)
-radio_button_shrinkage_type_frame.pack(pady=20, padx=60, fill="both")
-
-radio_button_shrinkage_type_mst = customtkinter.CTkRadioButton(master=radio_button_shrinkage_type_frame, 
-                                                           text="No shrinkage",
-                                                           command=read_radio_button_shrinkage_type, 
-                                                           variable=radio_button_shrinkage_type_var, 
-                                                           value=0)
-radio_button_shrinkage_type_mst.pack(pady=12, padx=10)
-radio_button_shrinkage_type_minnedges = customtkinter.CTkRadioButton(master=radio_button_shrinkage_type_frame, 
-                                                                 text="LP shrinkage on static window", 
-                                                                 command=read_radio_button_shrinkage_type, 
-                                                                 variable=radio_button_shrinkage_type_var, 
-                                                                 value=1)
-radio_button_shrinkage_type_minnedges.pack(pady=12, padx=10)
-radio_button_shrinkage_type_threshold = customtkinter.CTkRadioButton(master=radio_button_shrinkage_type_frame, 
-                                                                 text="LP shrinkage on moving window",
-                                                                 command=read_radio_button_shrinkage_type,
-                                                                 variable=radio_button_shrinkage_type_var, 
-                                                                 value=2)
-radio_button_shrinkage_type_threshold.pack(pady=12, padx=10)
 
 #GRAPH REPRESENTATION
 radio_button_draw_graph_circular_var = customtkinter.IntVar(value=0)
@@ -207,15 +223,21 @@ option_menu.set("Close")
 
 #CREATE DRAWING
 def create_plot():
+    if check_box_draw_all_stats_var.get() == "on":
+        settings.all_stats_together = True
+    else:
+        settings.all_stats_together = False
+
     if radio_button_draw_type_var.get() == 0 or radio_button_draw_type_var.get() == 1:
         settings.window_start = int(entry_window_start.get())
         settings.window_end = int(entry_window_end.get())
         settings.act_single_window = True
+        settings.all_stats_together = False
     elif radio_button_draw_type_var.get() == 2:
         settings.window_size = int(entry_window_size.get())
         settings.step_size = int(entry_window_step_size.get())
         settings.act_single_window = False
-
+        
     if radio_button_graph_type_var.get() == 1:
         settings.minimal_edges = int(entry_n_edges.get())
     elif radio_button_graph_type_var.get() == 2:
