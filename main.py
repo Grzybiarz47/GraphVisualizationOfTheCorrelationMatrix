@@ -1,4 +1,3 @@
-from PIL import ImageTk, Image
 from tkinter import filedialog
 import customtkinter
 import commands
@@ -160,7 +159,7 @@ radio_button_graph_type_mst = customtkinter.CTkRadioButton(master=radio_button_g
                                                            value=0)
 radio_button_graph_type_mst.pack(pady=12, padx=10)
 radio_button_graph_type_minnedges = customtkinter.CTkRadioButton(master=radio_button_graph_type_frame, 
-                                                                 text="Minnimal N Edges graph", 
+                                                                 text="Minnimal n edges for each vertex", 
                                                                  command=read_radio_button_graph_type, 
                                                                  variable=radio_button_graph_type_var, 
                                                                  value=1)
@@ -172,14 +171,14 @@ entry_n_edges.configure(state="disabled")
 entry_n_edges.pack(pady=12, padx=10)
 
 radio_button_graph_type_threshold = customtkinter.CTkRadioButton(master=radio_button_graph_type_frame, 
-                                                                 text="Threshold graph",
+                                                                 text="Average number of neighbours",
                                                                  command=read_radio_button_graph_type,
                                                                  variable=radio_button_graph_type_var, 
                                                                  value=2)
 radio_button_graph_type_threshold.pack(pady=12, padx=10)
 
 entry_threshold = customtkinter.CTkEntry(master=radio_button_graph_type_frame,
-                                         placeholder_text="Threshold value")
+                                         placeholder_text="Number of neighbours")
 entry_threshold.configure(state="disabled")
 entry_threshold.pack(pady=12, padx=10)
 
@@ -241,7 +240,12 @@ def create_plot():
     if radio_button_graph_type_var.get() == 1:
         settings.minimal_edges = int(entry_n_edges.get())
     elif radio_button_graph_type_var.get() == 2:
-        settings.threshold = float(entry_threshold.get())
+        settings.threshold = int(entry_threshold.get())
+    
+    if radio_button_draw_type_var.get() == 0 and radio_button_graph_type_var.get() == 2:
+        settings.animate = True
+    else:
+        settings.animate = False
 
     commands.draw(draw_type=radio_button_draw_type_var.get(),
                   graph_type=radio_button_graph_type_var.get(),

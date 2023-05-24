@@ -12,12 +12,13 @@ def init():
     global circular
     global t_out
     global all_stats_together
+    global animate
 
     n = 0
     column_names = []
     window_size = 500
     step_size = 21
-    threshold = 1.0
+    threshold = 1
     minimal_edges = 2
     window_start = 0
     window_end = 500
@@ -25,3 +26,4 @@ def init():
     circular = False
     t_out = 200
     all_stats_together = False
+    animate = False

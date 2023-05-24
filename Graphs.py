@@ -1,5 +1,5 @@
+from Animation import Animation
 from scipy.sparse.csgraph import minimum_spanning_tree
-from scipy.sparse.csgraph import breadth_first_order
 from scipy.sparse import csr_matrix
 import settings
 
@@ -12,18 +12,42 @@ class Graphs:
         return [tree, edges, weights]
     
     def createGraphWithThreshold(self, distMatrix):
-        tmp = distMatrix.copy()
+        all_weights = []
+        graphs = []
+        ths = []
         for i in range(settings.n):
             for j in range(i):
-                if tmp[i][j] > settings.threshold:
-                    tmp[i][j] = 0
-                tmp[j][i] = 0
+                all_weights.append(distMatrix[i][j])
+        
+        all_weights.sort()
+
+        start_num = settings.threshold
+        if settings.animate == True:
+            start_num = 1
+
+        for num_neighbours in range(start_num, settings.threshold + 1):
+            num_edges = num_neighbours * settings.n // 2
+            th = all_weights[num_edges - 1]
+            tmp = distMatrix.copy() 
+            for i in range(settings.n):
+                for j in range(i):
+                    if tmp[i][j] > th:
+                        tmp[i][j] = 0
+                    tmp[j][i] = 0
                     
-        graph = csr_matrix(tmp)
-        graphArr = graph.toarray()
-        edges, weights = self.__extractEdges(graphArr, symmetrical=True)
-        edges = self.__sortEdges(edges)
-        return [graph, edges, weights]
+            graph = csr_matrix(tmp)
+            graphArr = graph.toarray()
+            edges, weights = self.__extractEdges(graphArr, symmetrical=True)
+            edges = self.__sortEdges(edges)
+            graphs.append([weights, edges])
+            ths.append(th)
+
+            if num_neighbours == settings.threshold:
+                Animation.data = graphs
+                Animation.ths = ths
+                return [graph, edges, weights]
+            
+        return [[],[],[]]
     
     def createMinimalNTree(self, distMatrix):
         tmp = distMatrix.copy()

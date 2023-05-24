@@ -1,8 +1,7 @@
 from DataFrameHandler import DataFrameHandler
 from WindowAnalyzer import ShrinkageTypes, GraphTypes, WindowAnalyzer
 from Visualization import Visualization
-import numpy as np
-import matplotlib.pyplot as plt
+from Animation import Animation
 import settings
 
 def draw(draw_type, graph_type, shrinkage_type, colummn_picked, path):
@@ -40,6 +39,10 @@ def draw_single_graph(graph_type, shrinkage_type, colummn_picked, path):
         df[window_start:window_end], graph_type, shrinkage_type)
     print(str(dates[window_start]) + " - " + str(dates[window_end]))
 
+    if settings.animate == True:
+        Animation.createAnimation(sectors)
+        Animation.clean()
+        
     Visualization.drawGraph(weights, edges, sectors)
 
 def draw_all_stats(graph_type, shrinkage_type, colummn_picked, path):

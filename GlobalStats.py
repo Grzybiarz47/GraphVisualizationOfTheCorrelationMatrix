@@ -1,11 +1,6 @@
 import settings
 
 class GlobalStats:
-    Means = []
-    Variances = []
-    Skewness = []
-    Kurtosis = []
-
     def __init__(self):
         self.n = settings.n
         self.Means = []

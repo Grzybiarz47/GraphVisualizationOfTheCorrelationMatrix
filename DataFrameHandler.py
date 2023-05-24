@@ -4,10 +4,6 @@ import glob
 import settings
 
 class DataFrameHandler:
-    di = dict()
-    picked = dict()
-    sector = dict()
-
     def read(self, path, picked_column="Close"):
         all_files = glob.glob(path + "/*.csv")
         settings.n = len(all_files)

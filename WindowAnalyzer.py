@@ -23,8 +23,6 @@ class ShrinkageTypes(Enum):
     WINDOWED_SHRINKAGE_LP = 3
 
 class WindowAnalyzer:
-    data = pd.DataFrame()
-
     def __init__(self, df):
         self.data = df
         sys.path.insert(0,'./shrinkage')

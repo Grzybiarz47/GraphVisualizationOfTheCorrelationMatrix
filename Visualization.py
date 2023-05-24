@@ -1,5 +1,4 @@
 from colour import Color
-from matplotlib.legend import _get_legend_handles_labels
 import matplotlib.pyplot as plt
 import numpy as np
 import igraph as ig
