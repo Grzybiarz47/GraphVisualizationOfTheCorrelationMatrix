@@ -100,16 +100,13 @@ class Visualization:
         plt.show()
 
     @staticmethod
-    def drawAllStatsTogether(dates, no_shrinkage_stats, simple_lp_shrinkage, windowed_lp_shrinkage):
+    def drawAllStatsTogether(dates, no_shrinkage_stats, simple_lp_shrinkage):
         labels_no_shrinkage = list()
         labels_lp_shrinkage = list()
-        labels_windowed_lp_shrinkage = list()
         for elem in no_shrinkage_stats[2]:
             labels_no_shrinkage.append(settings.column_names[elem])
         for elem in simple_lp_shrinkage[2]:
             labels_lp_shrinkage.append(settings.column_names[elem])
-        for elem in windowed_lp_shrinkage[2]:
-            labels_windowed_lp_shrinkage.append(settings.column_names[elem])
 
         fig, axs = plt.subplots(4, 3, figsize=(20, 16))
         plt.xticks(fontsize=7)
@@ -123,11 +120,9 @@ class Visualization:
                     x = dates[1:]
                 axs[i, j].plot(x, no_shrinkage_stats[i*3 + j], label="No shrinkage")
                 axs[i, j].plot(x, simple_lp_shrinkage[i*3 + j], label="LP shrinkage on static window")
-                axs[i, j].plot(x[:len(windowed_lp_shrinkage[i*3 + j])], windowed_lp_shrinkage[i*3 + j], label="Bartz shrinkage on moving window")
 
         axs[3, 0].plot(x, labels_no_shrinkage, 'ro')
         axs[3, 1].plot(x, labels_lp_shrinkage, 'ro')
-        axs[3, 2].plot(x[:len(labels_windowed_lp_shrinkage)], labels_windowed_lp_shrinkage, 'ro')
         
         axs[0, 0].set_title("Mean length", fontsize=7, x=.5, y=.9)
         axs[0, 1].set_title("Mean coefficient", fontsize=7, x=.5, y=.9)
@@ -139,13 +134,13 @@ class Visualization:
         axs[2, 2].set_title("Number of edges", fontsize=7, x=.5, y=.9)
         axs[3, 0].set_title("Central nodes", fontsize=7, x=.5, y=.9)
         axs[3, 1].set_title("Central nodes - LP", fontsize=7, x=.5, y=.9)
-        axs[3, 2].set_title("Central nodes - Bartz", fontsize=7, x=.5, y=.9)
         handles, labels = axs[0, 0].get_legend_handles_labels()
         fig.legend(handles, labels, fontsize=15, loc="upper right")
         for a in axs.flatten():
             a.tick_params(axis='both', which='major', labelsize=7)
             a.tick_params(axis='both', which='minor', labelsize=7)
         fig.delaxes(axs[0][2])
+        fig.delaxes(axs[3][2])
         fig.tight_layout()
         plt.get_current_fig_manager().window.state('zoomed')
         plt.show()

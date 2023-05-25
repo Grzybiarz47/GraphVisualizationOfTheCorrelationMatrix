@@ -128,12 +128,6 @@ radio_button_shrinkage_type_minnedges = customtkinter.CTkRadioButton(master=radi
                                                                  variable=radio_button_shrinkage_type_var, 
                                                                  value=1)
 radio_button_shrinkage_type_minnedges.pack(pady=12, padx=10)
-radio_button_shrinkage_type_threshold = customtkinter.CTkRadioButton(master=radio_button_shrinkage_type_frame, 
-                                                                 text="Bartz shrinkage on moving window",
-                                                                 command=read_radio_button_shrinkage_type,
-                                                                 variable=radio_button_shrinkage_type_var, 
-                                                                 value=2)
-radio_button_shrinkage_type_threshold.pack(pady=12, padx=10)
 
 #GRAPH TYPES
 radio_button_graph_type_var = customtkinter.IntVar(value=0)

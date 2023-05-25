@@ -19,8 +19,7 @@ class GraphTypes(Enum):
 
 class ShrinkageTypes(Enum):
     NO_SHRINKAGE = 1,
-    SIMPLE_SHRINKAGE_LP = 2,
-    WINDOWED_SHRINKAGE_LP = 3
+    SIMPLE_SHRINKAGE_LP = 2
 
 class WindowAnalyzer:
     def __init__(self, df):
@@ -60,21 +59,6 @@ class WindowAnalyzer:
 
         conv = LPS.rie(x=LPS.xi_LP)
         return conv
-
-    def __shrinkWindowedConvMatrix(self, df):
-        real_data = DataMatrix(
-            method='load',
-            Y=df.to_numpy().T
-        )
-
-        LPS = LedoitPecheShrinkage(
-            Y=real_data.Y,
-            T=self.__calcWindowSize(),
-            T_out=settings.t_out
-        )
-
-        conv = LPS.rie(x=LPS.xi_oracle_mwcv_iso)
-        return conv
     
     def __calcCorrelationCoef(self, conv_i, conv_j, conv_ij):
         p = (conv_ij)/math.sqrt((conv_i)*(conv_j))
@@ -92,15 +76,6 @@ class WindowAnalyzer:
     def __createImprovedCoefMatrix(self, df):
         corr = np.zeros(shape=(settings.n, settings.n))
         conv = self.__shrinkConvMatrix(df)
-        for i in range(settings.n):
-            for j in range(settings.n):
-                corr[i][j] = self.__calcCorrelationCoef(conv[i][i], conv[j][j], conv[i][j])
-
-        return corr
-    
-    def __createImprovedWindowedCoefMatrix(self, df):
-        corr = np.zeros(shape=(settings.n, settings.n))
-        conv = self.__shrinkWindowedConvMatrix(df)
         for i in range(settings.n):
             for j in range(settings.n):
                 corr[i][j] = self.__calcCorrelationCoef(conv[i][i], conv[j][j], conv[i][j])
@@ -125,8 +100,6 @@ class WindowAnalyzer:
             corrMatrix = self.__createCoefMatrix(window)
         elif shrinkage_type == ShrinkageTypes.SIMPLE_SHRINKAGE_LP:
             corrMatrix = self.__createImprovedCoefMatrix(window)
-        elif shrinkage_type == ShrinkageTypes.WINDOWED_SHRINKAGE_LP:
-            corrMatrix = self.__createImprovedWindowedCoefMatrix(window)
 
         distMatrix = self.__createDistanceMatrix(corrMatrix)
         g = Graphs()
@@ -145,9 +118,6 @@ class WindowAnalyzer:
         start_time = 0
         global_stats = GlobalStats()
 
-        if shrinkage_type == ShrinkageTypes.WINDOWED_SHRINKAGE_LP:
-            period -= 2*settings.t_out
-
         prev_edges = []
         Lengths = []
         Centrals = []
@@ -160,8 +130,6 @@ class WindowAnalyzer:
         while start_time + window_size < period:
             end_time = start_time + window_size
             Dates.append(end_time)
-            if shrinkage_type == ShrinkageTypes.WINDOWED_SHRINKAGE_LP:
-                end_time += 2*settings.t_out
             window = df[start_time:end_time]
 
             start_time += settings.step_size

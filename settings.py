@@ -10,7 +10,6 @@ def init():
     global window_end
     global act_single_window
     global circular
-    global t_out
     global all_stats_together
     global animate
 
@@ -24,6 +23,5 @@ def init():
     window_end = 500
     act_single_window = False
     circular = False
-    t_out = 200
     all_stats_together = False
     animate = False
