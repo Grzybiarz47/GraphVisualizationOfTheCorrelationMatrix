@@ -11,7 +11,7 @@ customtkinter.set_default_color_theme("dark-blue")
 app_label_text = "Graph visualization of the correlation matrix"
 root = customtkinter.CTk()
 root.title(app_label_text)
-root.geometry("700x500")
+root.geometry("700x600")
 
 main_frame = customtkinter.CTkScrollableFrame(master=root)
 main_frame.pack(pady=20, padx=60, fill="both", expand=True)
@@ -27,13 +27,28 @@ def read_directory():
     directory_label.configure(text=filename)
     print(filename)
 
+directory_label = customtkinter.CTkLabel(master=main_frame, text="Set directory of *.csv files", font=("Roboto", 15))
+directory_label.pack(pady=5, padx=10)
+
 read_button = customtkinter.CTkButton(master=main_frame, 
                                       text="Read path", 
                                       command=read_directory)
-read_button.pack(pady=12, padx=10)
+read_button.pack(pady=5, padx=10)
 
-directory_label = customtkinter.CTkLabel(master=main_frame, text="Set directory of *.csv files", font=("Roboto", 15))
-directory_label.pack(pady=12, padx=10)
+#PICK COLUMN
+option_type_var = customtkinter.StringVar(value="Close")
+def read_option_menu(choice):
+    print("option menu dropdown clicked:", choice)
+
+option_label = customtkinter.CTkLabel(master=main_frame, text="Pick column name", font=("Roboto", 15))
+option_label.pack(pady=5, padx=10)
+
+option_menu = customtkinter.CTkOptionMenu(master=main_frame,
+                                          values=["Close", "Open", "High", "Low"],
+                                          command=read_option_menu,
+                                          variable=option_type_var)
+option_menu.pack(pady=5, padx=10)
+option_menu.set("Close")
 
 #DRAW TYPE
 radio_button_draw_type_var = customtkinter.IntVar(value=0)
@@ -52,8 +67,11 @@ def read_radio_button_draw_type():
         entry_window_end.configure(state="disabled")
         checkbox.configure(state="normal")
 
-radio_button_draw_type_frame = customtkinter.CTkFrame(master=main_frame)
+radio_button_draw_type_frame = customtkinter.CTkFrame(master=main_frame, border_width=2, border_color="white")
 radio_button_draw_type_frame.pack(pady=20, padx=60, fill="both")
+
+draw_label = customtkinter.CTkLabel(master=radio_button_draw_type_frame, text="Plotting options", font=("Roboto", 20))
+draw_label.pack(pady=12, padx=10)
 
 radio_button_draw_type_single_window = customtkinter.CTkRadioButton(master=radio_button_draw_type_frame, 
                                                                     text="Draw graph for single window",
@@ -108,27 +126,6 @@ checkbox = customtkinter.CTkCheckBox(master=radio_button_draw_type_frame,
 checkbox.configure(state="disabled")
 checkbox.pack(padx=12, pady=10)
 
-#SHRINKAGE TYPES
-radio_button_shrinkage_type_var = customtkinter.IntVar(value=0)
-def read_radio_button_shrinkage_type():
-    print("toggled shrink type, current value:", radio_button_shrinkage_type_var.get())
-
-radio_button_shrinkage_type_frame = customtkinter.CTkFrame(master=main_frame)
-radio_button_shrinkage_type_frame.pack(pady=20, padx=60, fill="both")
-
-radio_button_shrinkage_type_mst = customtkinter.CTkRadioButton(master=radio_button_shrinkage_type_frame, 
-                                                           text="No shrinkage",
-                                                           command=read_radio_button_shrinkage_type, 
-                                                           variable=radio_button_shrinkage_type_var, 
-                                                           value=0)
-radio_button_shrinkage_type_mst.pack(pady=12, padx=10)
-radio_button_shrinkage_type_minnedges = customtkinter.CTkRadioButton(master=radio_button_shrinkage_type_frame, 
-                                                                 text="LP shrinkage on static window", 
-                                                                 command=read_radio_button_shrinkage_type, 
-                                                                 variable=radio_button_shrinkage_type_var, 
-                                                                 value=1)
-radio_button_shrinkage_type_minnedges.pack(pady=12, padx=10)
-
 #GRAPH TYPES
 radio_button_graph_type_var = customtkinter.IntVar(value=0)
 def read_radio_button_graph_type():
@@ -143,8 +140,11 @@ def read_radio_button_graph_type():
         entry_n_edges.configure(state="disabled")
         entry_threshold.configure(state="normal")
 
-radio_button_graph_type_frame = customtkinter.CTkFrame(master=main_frame)
+radio_button_graph_type_frame = customtkinter.CTkFrame(master=main_frame, border_width=2, border_color="white")
 radio_button_graph_type_frame.pack(pady=20, padx=60, fill="both")
+
+graph_label = customtkinter.CTkLabel(master=radio_button_graph_type_frame, text="Graph type", font=("Roboto", 20))
+graph_label.pack(pady=12, padx=10)
 
 radio_button_graph_type_mst = customtkinter.CTkRadioButton(master=radio_button_graph_type_frame, 
                                                            text="Minnimal Spanning Tree",
@@ -176,6 +176,30 @@ entry_threshold = customtkinter.CTkEntry(master=radio_button_graph_type_frame,
 entry_threshold.configure(state="disabled")
 entry_threshold.pack(pady=12, padx=10)
 
+#SHRINKAGE TYPES
+radio_button_shrinkage_type_var = customtkinter.IntVar(value=0)
+def read_radio_button_shrinkage_type():
+    print("toggled shrink type, current value:", radio_button_shrinkage_type_var.get())
+
+radio_button_shrinkage_type_frame = customtkinter.CTkFrame(master=main_frame, border_width=2, border_color="white")
+radio_button_shrinkage_type_frame.pack(pady=20, padx=60, fill="both")
+
+shrinkage_label = customtkinter.CTkLabel(master=radio_button_shrinkage_type_frame, text="Shrinkage options", font=("Roboto", 20))
+shrinkage_label.pack(pady=12, padx=10)
+
+radio_button_shrinkage_type_mst = customtkinter.CTkRadioButton(master=radio_button_shrinkage_type_frame, 
+                                                           text="No shrinkage",
+                                                           command=read_radio_button_shrinkage_type, 
+                                                           variable=radio_button_shrinkage_type_var, 
+                                                           value=0)
+radio_button_shrinkage_type_mst.pack(pady=12, padx=10)
+radio_button_shrinkage_type_minnedges = customtkinter.CTkRadioButton(master=radio_button_shrinkage_type_frame, 
+                                                                 text="Ledoit-Peche shrinkage on static window", 
+                                                                 command=read_radio_button_shrinkage_type, 
+                                                                 variable=radio_button_shrinkage_type_var, 
+                                                                 value=1)
+radio_button_shrinkage_type_minnedges.pack(pady=12, padx=10)
+
 #GRAPH REPRESENTATION
 radio_button_draw_graph_circular_var = customtkinter.IntVar(value=0)
 def read_graph_representation():
@@ -185,8 +209,11 @@ def read_graph_representation():
     elif radio_button_draw_graph_circular_var.get() == 1:
         settings.circular = True
 
-radio_button_draw_graph_frame = customtkinter.CTkFrame(master=main_frame)
+radio_button_draw_graph_frame = customtkinter.CTkFrame(master=main_frame, border_width=2, border_color="white")
 radio_button_draw_graph_frame.pack(pady=20, padx=60, fill="both")
+
+graph_representation_label = customtkinter.CTkLabel(master=radio_button_draw_graph_frame, text="Graph representation", font=("Roboto", 20))
+graph_representation_label.pack(pady=12, padx=10)
 
 radio_button_draw_graph_auto = customtkinter.CTkRadioButton(master=radio_button_draw_graph_frame, 
                                                             text="Automatic graph representation",
@@ -201,18 +228,6 @@ radio_button_draw_graph_circular = customtkinter.CTkRadioButton(master=radio_but
                                                                 variable=radio_button_draw_graph_circular_var, 
                                                                 value=1)
 radio_button_draw_graph_circular.pack(pady=12, padx=10)
-
-#PICK COLUMN
-option_type_var = customtkinter.StringVar(value="Close")
-def read_option_menu(choice):
-    print("option menu dropdown clicked:", choice)
-
-option_menu = customtkinter.CTkOptionMenu(master=radio_button_draw_graph_frame,
-                                          values=["Close", "Open", "High", "Low"],
-                                          command=read_option_menu,
-                                          variable=option_type_var)
-option_menu.pack(pady=12, padx=10)
-option_menu.set("Close")
 
 #CREATE DRAWING
 def create_plot():
