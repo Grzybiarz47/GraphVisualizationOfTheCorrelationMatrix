@@ -119,7 +119,7 @@ class Visualization:
                 elif i == 1 and j == 1:
                     x = dates[1:]
                 axs[i, j].plot(x, no_shrinkage_stats[i*3 + j], label="No shrinkage")
-                axs[i, j].plot(x, simple_lp_shrinkage[i*3 + j], label="LP shrinkage on static window")
+                axs[i, j].plot(x, simple_lp_shrinkage[i*3 + j], label="Ledoit-Peche shrinkage on static window")
 
         axs[3, 0].plot(x, labels_no_shrinkage, 'ro')
         axs[3, 1].plot(x, labels_lp_shrinkage, 'ro')
